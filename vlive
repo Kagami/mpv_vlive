@@ -1,0 +1,20 @@
+#!/bin/bash
+
+page_url="$1"
+if [[ "$page_url" =~ ^[0-9]+$ ]]; then
+    page_url="http://www.vlive.tv/video/${page_url}"
+elif [[ ! "$page_url" =~ ^http ]]; then
+    echo "Usage: $0 <vlive-url>" >&2
+    exit 1
+fi
+
+stream_url="$(youtube-dl.dev -g "$page_url")"
+if [[ "$stream_url" =~ vlive\.hls ]]; then
+    exec livestreamer "hlsvariant://${stream_url}" best \
+        --player=mpv \
+        --hls-segment-threads=3
+elif [[ "$stream_url" =~ ^http ]]; then
+    exec mpv "$stream_url"
+else
+    exit 1
+fi
