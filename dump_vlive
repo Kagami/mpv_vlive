@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+fatal() {
+  echo "$1" >&2
+  exit 1
+}
+
+page_url="$1"
+if [[ "$page_url" =~ ^[0-9]+$ ]]; then
+    page_url="http://www.vlive.tv/video/${page_url}"
+elif [[ ! "$page_url" =~ ^http ]]; then
+    fatal "Usage: $0 <vlive-url>"
+fi
+
+video_id="${page_url#*video/}"
+video_id="${video_id%%/*}"
+if [[ ! "$video_id" =~ ^[0-9]+$ ]]; then
+    fatal "Can't match video id"
+fi
+
+base_path="vlive-${video_id}-$(date "+%Y%m%d%H%M%S")"
+video_path="${base_path}.ts"
+sub_path="${base_path}.vtt"
+log_path="${base_path}.log"
+
+stream_url="$(youtube-dl --get-url "$page_url")"
+if [[ ! "$stream_url" =~ vlive\.hls ]]; then
+    fatal "Not a live"
+fi
+
+video_stream_url="hls://${stream_url}"
+sub_stream_url="${video_stream_url/chunklist.m3u8*/subtitlelist_leng.m3u8}"
+
+livestreamer "$sub_stream_url" best -f -o "$sub_path" &>"$log_path" &
+livestreamer "$video_stream_url" best --hls-segment-threads 3 -f -o "$video_path"
+
+wait
