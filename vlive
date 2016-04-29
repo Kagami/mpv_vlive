@@ -8,9 +8,9 @@ elif [[ ! "$page_url" =~ ^http ]]; then
     exit 1
 fi
 
-stream_url="$(youtube-dl.dev --get-url "$page_url")"
+stream_url="$(youtube-dl --get-url "$page_url")"
 if [[ "$stream_url" =~ vlive\.hls ]]; then
-    exec livestreamer "hlsvariant://${stream_url}" best \
+    exec livestreamer "hls://${stream_url}" best \
         --player=mpv \
         --hls-segment-threads=3
 elif [[ "$stream_url" =~ ^http ]]; then
