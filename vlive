@@ -10,9 +10,15 @@ fi
 
 stream_url="$(youtube-dl --get-url "$page_url")"
 if [[ "$stream_url" =~ vlive\.hls ]]; then
-    exec livestreamer "hls://${stream_url}" best \
-        --player=mpv \
-        --hls-segment-threads=3
+    video_stream_url="hls://${stream_url}"
+    sub_stream_url="${video_stream_url/chunklist.m3u8*/subtitlelist_leng.m3u8}"
+    sub_path="$(mktemp --suffix=.vtt)"
+    livestreamer "$sub_stream_url" best -f -o "$sub_path" &>/dev/null &
+    livestreamer "$video_stream_url" best \
+        --hls-segment-threads=3 \
+        --player="mpv --script-opts=vlive='$sub_path'"
+    kill %
+    rm "$sub_path"
 elif [[ "$stream_url" =~ ^http ]]; then
     exec mpv "$stream_url"
 else
