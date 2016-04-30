@@ -13,10 +13,10 @@ Watch videos from [vlive.tv](http://www.vlive.tv/) in [mpv](https://mpv.io/).
 ```bash
 sudo apt-get install youtube-dl livestreamer
 git clone https://github.com/Kagami/mpv_vlive.git ~/mpv_vlive
-mkdir -p ~/.local/bin ~/.mpv/scripts
+mkdir -p ~/.local/bin ~/.config/mpv/scripts
 ln -s ~/mpv_vlive/vlive ~/.local/bin
 ln -s ~/mpv_vlive/dump_vlive ~/.local/bin
-ln -s ~/mpv_vlive/vlive.lua ~/.mpv/scripts
+ln -s ~/mpv_vlive/vlive.lua ~/.config/mpv/scripts
 ```
 
 ### Usage
