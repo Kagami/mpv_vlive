@@ -18,6 +18,7 @@ if [[ "$stream_url" =~ vlive\.hls ]]; then
         --hls-segment-threads=3 \
         --player="mpv --script-opts=vlive='$sub_path'"
     kill %
+    wait
     rm "$sub_path"
 elif [[ "$stream_url" =~ ^http ]]; then
     exec mpv "$stream_url"
