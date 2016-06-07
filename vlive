@@ -9,13 +9,16 @@ elif [[ ! "$page_url" =~ ^http ]]; then
 fi
 
 stream_url="$(youtube-dl --get-url "$page_url")"
-if [[ "$stream_url" =~ vlive\.hls ]]; then
+if [[ "$stream_url" =~ vlive\.hls|hls\.vlive ]]; then
     video_stream_url="hls://${stream_url}"
+    key="${stream_url#*__agda__=}"
+    key="${key%%&*}"
     # sub_stream_url="${video_stream_url/chunklist.m3u8*/subtitlelist_leng.m3u8}"
     # sub_path="$(mktemp --suffix=.vtt)"
     # livestreamer "$sub_stream_url" best -Q -f -o "$sub_path" &
     livestreamer "$video_stream_url" best \
         --hls-segment-threads=3 \
+        --http-query-param="__bgda__=$key" \
         --player=mpv
     # kill %
     # wait

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 fatal() {
-  echo "$1" >&2
-  exit 1
+    echo "$1" >&2
+    exit 1
 }
 
 page_url="$1"
@@ -19,18 +19,26 @@ if [[ ! "$video_id" =~ ^[0-9]+$ ]]; then
 fi
 
 stream_url="$(youtube-dl --get-url "$page_url")"
-if [[ ! "$stream_url" =~ vlive\.hls ]]; then
+if [[ ! "$stream_url" =~ vlive\.hls|hls\.vlive ]]; then
     fatal "Not a live"
 fi
 
 video_stream_url="hls://${stream_url}"
 sub_stream_url="${video_stream_url/chunklist.m3u8*/subtitlelist_leng.m3u8}"
+key="${stream_url#*__agda__=}"
+key="${key%%&*}"
 
 base_path="vlive-${video_id}-$(date "+%Y%m%d%H%M%S")"
 video_path="${base_path}.ts"
 sub_path="${base_path}.vtt"
 
 livestreamer "$sub_stream_url" best -f -o "$sub_path" &>/dev/null &
-livestreamer "$video_stream_url" best --hls-segment-threads 3 -f -o "$video_path"
+trap 'kill %' EXIT
+livestreamer "$video_stream_url" best \
+    --hls-segment-threads=3 \
+    --http-query-param="__bgda__=$key" \
+    --output="$video_path" \
+    --force
 
+echo "Waiting for the subs process. Press Ctrl+C to exit." >&2
 wait
