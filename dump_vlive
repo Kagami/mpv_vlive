@@ -29,9 +29,8 @@ sub_stream_url="${video_stream_url/chunklist.m3u8*/subtitlelist_leng.m3u8}"
 base_path="vlive-${video_id}-$(date "+%Y%m%d%H%M%S")"
 video_path="${base_path}.ts"
 sub_path="${base_path}.vtt"
-log_path="${base_path}.log"
 
-livestreamer "$sub_stream_url" best -f -o "$sub_path" &>"$log_path" &
+livestreamer "$sub_stream_url" best -f -o "$sub_path" &>/dev/null &
 livestreamer "$video_stream_url" best --hls-segment-threads 3 -f -o "$video_path"
 
 wait
